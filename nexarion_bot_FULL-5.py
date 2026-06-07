@@ -83,7 +83,12 @@ def user(uid):
     r=qone("SELECT * FROM users WHERE user_id=?",(uid,))
     if not r: return None
     keys=["user_id","username","first_name","points","referral_code","referred_by","channel_joined","twitter_followed","twitter_opened","onboarded","total_earned","total_withdrawn","banned","join_date"]
-    return dict(zip(keys,r))
+    d=dict(zip(keys,r))
+    # Convert numeric fields from string to int
+    for k in ["points","channel_joined","twitter_followed","twitter_opened","onboarded","total_earned","total_withdrawn","banned"]:
+        try: d[k]=int(d[k]) if d[k] is not None else 0
+        except: d[k]=0
+    return d
 
 def is_admin(uid): return qone("SELECT 1 FROM admins WHERE user_id=?",(uid,)) is not None
 
