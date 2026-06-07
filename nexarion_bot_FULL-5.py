@@ -573,10 +573,13 @@ if __name__=="__main__":
         test=turso_exec("SELECT 1")
         print(f"✅ Turso connected: {test}")
         print("Building app...")
-        app=build()
-        # Start HTTP server in background AFTER event loop is set up
+        # Fix for Python 3.10+ event loop issue
+        loop=asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        # Start HTTP server
         t=threading.Thread(target=run_server,daemon=True)
         t.start()
+        app=build()
         print("Starting polling...")
         app.run_polling(drop_pending_updates=True)
     except Exception as e:
