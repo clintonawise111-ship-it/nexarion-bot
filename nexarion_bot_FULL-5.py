@@ -167,10 +167,12 @@ async def cmd_start(update,context):
     if args and args[0].startswith("NEX") and args[0]!=f"NEX{uid}":
         rid=args[0].replace("NEX","")
         if rid.isdigit(): ref=int(rid)
-    if not user(uid):
-        reg(uid,u.username,u.first_name,ref)
-        if ref: qrun("INSERT OR IGNORE INTO referrals(referrer,referred,at) VALUES(?,?,?)",(ref,uid,datetime.now().isoformat()))
+    # Always register - INSERT OR IGNORE means safe to call always
+    reg(uid,u.username,u.first_name,ref)
+    if ref: qrun("INSERT OR IGNORE INTO referrals(referrer,referred,at) VALUES(?,?,?)",(ref,uid,datetime.now().isoformat()))
     u2=user(uid)
+    if not u2:
+        await update.message.reply_text("⚠️ Error loading profile. Please try /start again."); return
     # Admin can never be banned
     if u2["banned"] and uid != ADMIN_ID and not is_admin(uid):
         await update.message.reply_text("🚫 You are banned."); return
